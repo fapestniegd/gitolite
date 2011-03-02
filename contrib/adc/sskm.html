@@ -1,0 +1,280 @@
+<p><head><style>
+    body        { margin-left:  40px;   font-size:  0.9em;  font-family: sans-serif; max-width: 800px; }
+    h1          { margin-left: -30px;   border-bottom: 5px  solid #ccc; }
+    h2, h3      { margin-left: -30px;   border-top:    3px  solid #ddd; }
+    h4, h5      { margin-left: -20px; }
+    code        { font-size:    1.1em;  background:  #eee; }
+    pre         { margin-left:  2em;    background:  #eee; }
+    pre code    { font-size:    1.1em;  background:  #eee; }
+</style></head></p>
+
+<h2>self service key management</h2>
+
+<p>This ADC lets users manage their own keys, except for the very first one.</p>
+
+<p>In this document:</p>
+
+<ul>
+<li><a href="#_caveats_and_cautions">caveats and cautions</a>
+<ul>
+<li><a href="#_important_notes_for_the_admin">important notes for the admin</a></li>
+<li><a href="#_important_notes_for_the_user">important notes for the user</a></li>
+</ul></li>
+<li><a href="#_discussion">discussion</a></li>
+<li><a href="#_terminology">terminology</a></li>
+<li><a href="#_common_operations">common operations</a>
+<ul>
+<li><a href="#_replace_a_key">replace a key</a></li>
+<li><a href="#_delete_a_key">delete a key</a></li>
+<li><a href="#_add_a_completely_new_key">add a completely new key</a></li>
+</ul></li>
+<li><a href="#_commands">commands</a></li>
+</ul>
+
+<hr />
+
+<p><a name="_caveats_and_cautions"></a></p>
+
+<h3>caveats and cautions</h3>
+
+<p><a name="_important_notes_for_the_admin"></a></p>
+
+<h4>important notes for the admin</h4>
+
+<p>These are the things that can break if you use this ADC:</p>
+
+<ul>
+<li><p>if you, as the gitolite admin, are in the habit of force-pushing changes
+to the admin repo instead of doing a <code>git pull</code> (or, even better, a <code>git
+pull --rebase</code>) then you had better not enable this ADC.  Your users will
+eventually come after you with pitchforks ;-)</p></li>
+<li><p>there is no way to distinguish <code>foo/alice.pub</code> from <code>bar/alice.pub</code> using
+this ADC.  You can distinguish <code>foo/alice.pub</code> from <code>bar/alice@home.pub</code>,
+but that's not because of the foo and bar, it's because the two files have
+different keyids (see later for what a keyid is).</p>
+
+<p>So, if you have the same <em>filename</em> in different subdirectories of
+<code>keydir</code>, you can't use this tool.</p></li>
+<li><p>keys placed in specific folders (perhaps to do <a href="http://sitaramc.github.com/gitolite/doc/big-config.html#_optimising_the_authkeys_file">this</a>, or for
+whatever other reasons), may not stay in those folders if this ADC is
+used.  The only operation that is guaranteed to preserve specific key
+placements like this is the "replace a key" operation (see "common
+operations" section below).</p>
+
+<p>If you're adding a brand new keyfile (typically with a new keyid, like
+maybe <code>@home</code>), there is no way to specify where the key should go, so it
+goes directly into <code>keydir/</code>.</p>
+
+<p>More importantly, deleting a key that was in a specific folder, and then
+undeleting it, will cause it to effectively move to the root of the key
+store (i.e., the <code>keydir</code> directory in the gitolite-admin repo).</p></li>
+</ul>
+
+<p><a name="_important_notes_for_the_user"></a></p>
+
+<h4>important notes for the user</h4>
+
+<ul>
+<li><p>discussion on how to tell your client to use the right keys is out of
+scope of this document.  It's even more fun if you're overwriting key
+files with new ones <em>and</em> are using ssh-agent!  Finally, if you're looking
+to replace one of your keys, do not simply overwrite the keypair in your
+<code>~/.ssh</code>.  You will need the old one in order to add the new one (see
+below).</p></li>
+<li><p>this is not a recovery program -- it will not help you if you <em>lost</em> all
+your private keys.  You will need at least one keypair that is known to
+gitolite in order to do anything at all with this script.</p></li>
+</ul>
+
+<p><a name="_discussion"></a></p>
+
+<h3>discussion</h3>
+
+<p>This ADC lets users manage their own keys.  However, it works a little
+differently to how users would do this in sites like github etc.  In those
+cases there is a primary, web-based login using a password of some sort that
+lets you do administrative tasks.  You acquire credentials for this using some
+sort of sign-up process, possibly involving email.</p>
+
+<p>Gitolite doesn't have any of that, since it's not meant to be a web-based
+thing at all.  This has the following implications:</p>
+
+<ul>
+<li><p>your very first pubkey will still need to be sent to an admin the normal
+way</p></li>
+<li><p>you can then add, delete, or replace your keys, as long as one is always
+"active".  You can even change that first key to something else, but at
+all times you will need to have at least one valid key in the system,
+because that is the only way gitolite recognises you.</p></li>
+</ul>
+
+<p><a name="_terminology"></a></p>
+
+<h3>terminology</h3>
+
+<p>A pubkey can optionally have a <strong>keyid</strong>.  It can be empty, so the pubkey file
+is named something like <code>alice.pub</code>, or it can have a value like <code>@home</code>,
+making the pubkey file <code>alice@home.pub</code>.  If that's not clear, you MUST read
+about how one user can have many keys <a href="http://sitaramc.github.com/gitolite/doc/3-faq-tips-etc.html#_one_user_many_keys">here</a>.</p>
+
+<p>A keyid must start with the <code>@</code> character and after that contain only digits,
+letters, or underscores.</p>
+
+<p>An <strong>active</strong> key is one that is known to gitolite and works normally to give
+you access to your repos.  If you never used this ADC (or your admin did not
+even install it) then all your keys are active.</p>
+
+<p>A <strong>marked</strong> key is one that has been marked for addition or deletion.  We use
+what is arguably a kludge to mark keys: <code>alice.pub</code> is renamed to
+<code>ZZZ-marked-for-del-alice.pub</code> <em>and</em> moved to the <code>ZZZ-marked</code> directory.
+(The reason to use something like this is to ensure that marked keys can never
+hide an active key, by appearing before it in the authkeys file).</p>
+
+<p>A key <strong>marked for addition</strong> can be <strong>confirmed</strong> by running this ADC using
+the key to be confirmed.  This is proof that you have the private key and
+helps prevent a DOS by someone else.</p>
+
+<p>The "add" can also be cancelled; see the <code>undo-add</code> command for details.</p>
+
+<p>A key <strong>marked for deletion</strong> can be <strong>confirmed</strong> by running this ADC using
+some other, <em>active</em>, key belonging to the same user.  This helps prevent a
+user from locking themselves out.</p>
+
+<p>The "del" can also be cancelled; see the <code>undo-del</code> command for details.</p>
+
+<p><a name="_common_operations"></a></p>
+
+<h3>common operations</h3>
+
+<p><a name="_replace_a_key"></a></p>
+
+<h4>replace a key</h4>
+
+<p>Replacing a key is very simple.</p>
+
+<ul>
+<li>use the <code>list</code> command using any of your valid keys to reconfirm what keys
+you have and which one you want to replace.  Note its keyid, if any.</li>
+<li>using any of your active keys (even the one you want to replace is fine),
+<code>add</code> a new key with the same keyid as the one you want to replace.</li>
+<li>using the new (marked but not yet active) key, use the <code>confirm-add</code>
+command</li>
+</ul>
+
+<p>This will replace the existing key with the keyid you specified.  It will also
+preserve the directory placement of this existing key; in fact it is the only
+command that will do so.</p>
+
+<p>If you realised before you did the <code>confirm-add</code> that you did not want to do
+this, you can use any active key to <code>undo-add</code> it.</p>
+
+<p><a name="_delete_a_key"></a></p>
+
+<h4>delete a key</h4>
+
+<ul>
+<li>use the list command as described in the "replace a key" section; make a
+note of the keyid of the key you wish to delete</li>
+<li>using any active key (even the one you wish to delete will do), run the
+<code>del</code> command, giving it the correct keyid.  This key will now become
+"marked for deletion".</li>
+<li>using any active key, run the <code>confirm-del</code> command</li>
+</ul>
+
+<p>And if you goofed and marked your last active key for deletion, you can
+<strong>undelete</strong> it using the <code>undo-del</code> command.  Just run it using the key that
+was marked for deletion and it will undelete itself.</p>
+
+<p><a name="_add_a_completely_new_key"></a></p>
+
+<h4>add a completely new key</h4>
+
+<ul>
+<li>use the <code>list</code> command to look at your keyids and choose a new, unused one
+for the key you are going to add</li>
+<li>using any active key, <code>add</code> the new key, and don't forget to supply the
+keyid!</li>
+<li>using the new (marked but not yet active) key, use the <code>confirm-add</code>
+command</li>
+</ul>
+
+<p><code>undo-add</code>, if needed, is done the same way as described above in the
+"replace a key" section.</p>
+
+<p><em>Warning</em>: if you omit the keyid, it will simply overwrite your normal key
+(for example <code>alice.pub</code>).  <em>This is almost certainly not what you want if
+you're reading this section!</em></p>
+
+<p><a name="_commands"></a></p>
+
+<h3>commands</h3>
+
+<p><strong>NOTE on keyid</strong>: Except for the 'add' example below, I will show only one
+variant of most commands (suffixed with the conventional notation for the
+optional keyid).  Just <strong>remember</strong> that if the keyid is empty, the keyfile
+name used is <code>alice.pub</code>, while if it is, for instance <code>@home</code>, then
+<code>alice@home.pub</code> is the keyfile name.</p>
+
+<ul>
+<li><p><strong>list</strong>: listing your current keys can be done from any key (active or
+marked).  It is a very useful command and since it also prints
+fingerprints you can use it to be absolutely sure which of your keys is
+where on the server (<code>ssh-keygen -l -f something.pub</code> will give you the
+fingerprint of that pubkey file).</p>
+
+<pre><code>ssh git@server sskm list
+</code></pre>
+
+<p>Sample output:</p>
+
+<pre><code>hello alice, you are currently using a normal ("active") key
+you have the following keys:
+== active keys ==
+1: e9:b8:e9:6c:5e:c5:51:19:75:98:31:39:44:50:47:d2 : alice.pub
+== keys marked for addition/replacement ==
+1: f0:16:b8:b0:82:90:1d:29:dc:14:04:14:a5:58:f2:c7 : alice.pub
+== keys marked for deletion ==
+1: d3:09:15:10:96:bc:eb:a2:ae:a7:dd:46:62:d1:6b:1f : alice@home.pub
+2: 14:82:fb:b4:89:24:5d:26:c8:32:65:d0:0e:d9:99:16 : alice@work.pub
+</code></pre></li>
+<li><p><strong>add</strong>: adding a new key can only be done from an active key</p>
+
+<pre><code># without using any keyid (normal key):
+cat alice-new.pub | ssh git@server sskm add
+
+# or, using a keyid of @home here:
+cat alice-new@home.pub | ssh git@server sskm add @home
+</code></pre>
+
+<p>When you later run the 'confirm-add' command, the new keyfile will either
+replace any existing keyfile of the same name or create a new one in
+<code>keydir/</code> if none existed before.</p></li>
+<li><p><strong>confirm-add</strong>: confirming a 'marked for add' key can only be done by
+using the candidate key itself to authenticate</p>
+
+<pre><code>ssh -i ~/.ssh/alice-new git@server sskm confirm-add [@keyid]
+</code></pre>
+
+<p>Once this is done you can work on your <code>~/.ssh</code> to delete the old keys.</p></li>
+<li><p><strong>undo-add</strong>: undoing a mistaken "add" operation also requires an active
+key as well</p>
+
+<pre><code>ssh git@server sskm undo-add [@keyid]
+</code></pre></li>
+<li><p><strong>del</strong>: deleting an existing key requires an active key.  It's also good
+to run the 'list' command to refresh your memory of what keys you have and
+which one you want to delete</p>
+
+<pre><code>ssh git@server sskm del [@keyid]
+</code></pre></li>
+<li><p><strong>confirm-del</strong>: confirming the deletion requires an active key.  This
+prevents inadvertent self-lockout</p>
+
+<pre><code>ssh git@server sskm confirm-del [@keyid]
+</code></pre></li>
+<li><p><strong>undo-del</strong>: undoing a del, just like confirming an "add", needs to be
+done by using the candidate key itself</p>
+
+<pre><code>ssh git@server sskm undo-del [@keyid]
+</code></pre></li>
+</ul>
