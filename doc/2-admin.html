@@ -76,10 +76,11 @@ periods and underscores</p></li>
 clone.  You can also organise them into various subdirectories of <code>keydir</code>
 if you wish, since the entire tree is searched.</p></li>
 <li><p>edit the config file (<code>conf/gitolite.conf</code> in your admin repo clone).  See
-<code>doc/gitolite.conf.mkd</code> in the gitolite source for details on what goes in
-that file, syntax, etc.  Just add new repos as needed, and add new users
-and give them permissions as required.  The users names should be exactly
-the same as their keyfile names, but without the <code>.pub</code> extension</p></li>
+<a href="http://sitaramc.github.com/gitolite/doc/gitolite.conf.html">doc/gitolite.conf.mkd</a> in the gitolite source for details on
+what goes in that file, syntax, etc.  Just add new repos as needed, and
+add new users and give them permissions as required.  The users names
+should be exactly the same as their keyfile names, but without the <code>.pub</code>
+extension</p></li>
 <li><p>when done, commit your changes and push.  Any new repos you specified will
 automatically be created (empty, but clonable) and users' access will be
 updated as needed.</p></li>

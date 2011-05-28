@@ -77,11 +77,13 @@ store (i.e., the <code>keydir</code> directory in the gitolite-admin repo).</p><
 <ul>
 <li><p>discussion on how to tell your client to use the right keys is out of
 scope of this document.  It's even more fun if you're overwriting key
-files with new ones <em>and</em> are using ssh-agent!  Finally, if you're looking
-to replace one of your keys, do not simply overwrite the keypair in your
-<code>~/.ssh</code>.  You will need the old one in order to add the new one (see
-below).</p></li>
-<li><p>this is not a recovery program -- it will not help you if you <em>lost</em> all
+files with new ones <em>and</em> are using ssh-agent!  <strong>In particular, ssh-agent
+has a nasty quirk that bites everyone the first time</strong> -- open <a href="http://sitaramc.github.com/gitolite/doc/ssh-troubleshooting.html#_appendix_3_ssh_client_may_not_be_offering_the_right_key">this
+link</a> and look for the word "quirk" for a description</p></li>
+<li><p>if you're looking to replace one of your keys, do not simply overwrite the
+keypair in your <code>~/.ssh</code>.  You will need the old one in order to add the
+new one (see below).</p></li>
+<li><p>this is not a recovery program -- it will not help you if you lost <em>all</em>
 your private keys.  You will need at least one keypair that is known to
 gitolite in order to do anything at all with this script.</p></li>
 </ul>
@@ -126,7 +128,7 @@ even install it) then all your keys are active.</p>
 
 <p>A <strong>marked</strong> key is one that has been marked for addition or deletion.  We use
 what is arguably a kludge to mark keys: <code>alice.pub</code> is renamed to
-<code>ZZZ-marked-for-del-alice.pub</code> <em>and</em> moved to the <code>ZZZ-marked</code> directory.
+<code>zzz-marked-for-del-alice.pub</code> <em>and</em> moved to the <code>zzz-marked</code> directory.
 (The reason to use something like this is to ensure that marked keys can never
 hide an active key, by appearing before it in the authkeys file).</p>
 
