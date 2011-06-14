@@ -69,7 +69,12 @@ group.</p>
 <p>Please note the syntax; the leading 0 is required.  If you change it
 <em>after</em> the install is complete, you'll have to do some chmod's also to
 adjust permissions of files and directories that have already been
-created.</p></li>
+created.</p>
+
+<p><strong>Note</strong>: if you change this setting on a running gitolite install, you
+<em>do</em> need to run a manual <code>chmod</code> on the server to fix up files already
+created, since umask only affects the permissions on newly created files,
+not existing ones.</p></li>
 </ul>
 
 <p><a name="_variables_with_an_efficiency_performance_impact"></a></p>

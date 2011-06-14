@@ -22,7 +22,10 @@ http URLs, read <a href="http://sitaramc.github.com/gitolite/doc/http-backend.ht
 <li><a href="#_side_note_upgrading">(side note) upgrading</a></li>
 <li><a href="#_package_method">package method</a></li>
 <li><a href="#_root_method">root method</a></li>
-<li><a href="#_non_root_method">non-root method</a></li>
+<li><a href="#_non_root_method">non-root method</a>
+<ul>
+<li><a href="#_upgrading_from_from_client_method_to_non_root_method">upgrading from from-client method to non-root method</a></li>
+</ul></li>
 </ul></li>
 <li><a href="#_troubleshooting">troubleshooting</a></li>
 <li><a href="#_important_points_to_note">important points to note</a></li>
@@ -204,6 +207,38 @@ gl-setup /tmp/YourName.pub
 
 <pre><code>git clone git@server:gitolite-admin
 </code></pre>
+
+<p><a name="_upgrading_from_from_client_method_to_non_root_method"></a></p>
+
+<h5>upgrading from from-client method to non-root method</h5>
+
+<p>Since the from-client method is now deprecated for reasons explained
+elsewhere, some folks may want to do their next upgrade using the non-root
+method.</p>
+
+<p>There are many, many ways to skin this cat; here's one way:</p>
+
+<ul>
+<li><p>follow non-root install but stop after the gl-system-install step</p></li>
+<li><p>temporarily rename your <code>~/.gitolite.rc</code> file to something else</p></li>
+<li><p>now run the gl-setup step</p>
+
+<p>(background: this will create a default rc file with default values, but
+crucially, it will give you the correct values for two very critical
+variables that are not used in the old from-client install method)</p></li>
+<li><p>edit <code>~/.gitolite.rc</code> and bring in any non-default settings you may have
+had in your old rc file.</p>
+
+<p>When you're done, the only difference between your old and current rc
+files should be that the <code>$GL_PACKAGE_CONF</code> and the <code>$GL_PACKAGE_HOOKS</code>
+variables are no longer commented out and look somewhat like this:</p>
+
+<pre><code>$GL_PACKAGE_CONF = '/home/git/share/gitolite/conf';
+$GL_PACKAGE_HOOKS = '/home/git/share/gitolite/hooks';
+</code></pre>
+
+<p>Now save the file.</p></li>
+</ul>
 
 <hr />
 
