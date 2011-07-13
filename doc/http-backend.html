@@ -44,7 +44,7 @@ convert it to http access are welcome :-)</p></li>
 <code>~/.netrc</code> file and making it <code>chmod 600</code>.  Anyway, http based access is
 inherently less secure than pubkeys so not much point worrying about it.</p></li>
 <li><p>I have not tested any of the ancillary standalone programs (like
-gl-dont-panic) in this mode.  They're most likely going to crash and burn
+gl-admin-push) in this mode.  They're most likely going to crash and burn
 because <code>$HOME</code> is not defined or in the wrong place; manually set
 <code>HOME=$GITOLITE_HTTP_HOME</code> and hope for the best.  Luckily most of them
 have to do with sshkeys so this may not matter.  YMMV.</p></li>

@@ -275,9 +275,9 @@ first place, so the simplest way is to enable it from the server side only.</p>
 <h4>losing your admin key</h4>
 
 <p>If you lost the admin key, and need to re-establish ownership of the
-gitolite-admin repository with a fresh key, take a look at the
-<code>src/gl-dont-panic</code> program.  You will need shell access to the server of
-course.  Run it without arguments to get instructions.</p>
+gitolite-admin repository with a fresh key, get a shell on the server and use
+the program called <code>gl-admin-push</code> that comes with gitolite.  See instructions
+<a href="http://sitaramc.github.com/gitolite/doc/3-faq-tips-etc.html#_gl_server_side_push_bypassing_gitolite_for_the_gitolite_admin_repo">here</a>.</p>
 
 <p><a name="_simulating_ssh_copy_id"></a></p>
 
@@ -461,14 +461,13 @@ invokes gitolite) is ignored.</p>
 
 <p>To fix this, you have to use a different keypair for gitolite access.  The
 best way to do this is to create a new keypair, copy the pubkey to the server
-as YourName.pub, then run <code>~/.gitolite/src/gl-dont-panic YourName.pub</code> on the
-server.  Remember to adjust your agent identities using ssh-add -D and ssh-add
-if you're using ssh-agent, otherwise these new keys may not work.</p>
+as YourName.pub, then run <code>gl-setup YourName.pub</code> on the server.  Remember to
+adjust your agent identities using ssh-add -D and ssh-add if you're using
+ssh-agent, otherwise these new keys may not work.</p>
 
-<p>[In addition, for the 'from-client' install method, the admin may have used
-the wrong URL syntax, having <strong>utterly failed</strong> to read/heed the message that
-shows up at the end of running <code>gl-easy-install</code>.  In this case the keys are
-different, but the wrong one is being used.]</p>
+<p>NOTE: If you installed using the 'from-client' install method, <code>gl-setup</code>
+won't work.  You will have to use the more generic method described
+<a href="http://sitaramc.github.com/gitolite/doc/3-faq-tips-etc.html#_gl_server_side_push_bypassing_gitolite_for_the_gitolite_admin_repo">here</a>.</p>
 
 <p><a name="_appendix_3_ssh_client_may_not_be_offering_the_right_key"></a></p>
 
