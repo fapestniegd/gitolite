@@ -61,20 +61,17 @@ the same value as that one.</p></li>
 
 <p>The default UMASK that gitolite uses makes all the repos and their
 contents have <code>rwx------</code> permissions.  People who want to run gitweb
-realise that this will not do.  The correct way to deal with this is to
-change this variable to <code>0027</code> (which gets you <code>rwxr-x---</code>), then add the
-apache or httpd user running the webserver as a member of the 'gitolite'
-group.</p>
+realise that this will not do.</p>
 
-<p>Please note the syntax; the leading 0 is required.  If you change it
-<em>after</em> the install is complete, you'll have to do some chmod's also to
-adjust permissions of files and directories that have already been
-created.</p>
+<p>The correct way to deal with this is to give this variable a value like
+<code>0027</code> (note the syntax: the leading 0 is required), and then make the
+user running the webserver (apache, www-data, whatever) a member of the
+'git' group.</p>
 
-<p><strong>Note</strong>: if you change this setting on a running gitolite install, you
-<em>do</em> need to run a manual <code>chmod</code> on the server to fix up files already
-created, since umask only affects the permissions on newly created files,
-not existing ones.</p></li>
+<p>If you've already installed gitolite then existing files will have to be
+fixed up manually (for a umask or 0027, that would be <code>chmod -R g+rX</code>).
+This is because umask only affects permissions on newly created files, not
+existing ones.</p></li>
 </ul>
 
 <p><a name="_variables_with_an_efficiency_performance_impact"></a></p>
