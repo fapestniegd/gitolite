@@ -139,6 +139,10 @@ repo    gitolite simplicity
 what that is.  The <code>+</code> was chosen because it is part of the "git push" syntax
 for non-ff pushes.</p>
 
+<p>Note that <em>tags</em> are generally considered "write once", so they are treated
+specially by gitolite: you need rewind permission (<code>RW+</code>) to <em>overwrite</em> a
+tag with a new value.</p>
+
 <p>In a later section you'll see some more advanced permissions.</p>
 
 <p><a name="_how_rules_are_matched"></a></p>
