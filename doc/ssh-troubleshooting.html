@@ -43,7 +43,7 @@ an expert at ssh</strong>.</p>
 <li><a href="#_typical_cause_s_">typical cause(s)</a></li>
 </ul></li>
 <li><a href="#_appendix_3_ssh_client_may_not_be_offering_the_right_key">appendix 3: ssh client may not be offering the right key</a></li>
-<li><a href="#_appendix_4_making_git_use_the_right_options_for_ssh">appendix 4: making git use the right options for ssh</a></li>
+<li><a href="#_appendix_4_host_aliases">appendix 4: host aliases</a></li>
 <li><a href="#_appendix_5_why_bypassing_gitolite_causes_a_problem">appendix 5: why bypassing gitolite causes a problem</a></li>
 </ul>
 
@@ -482,7 +482,7 @@ verbose mode and look for the word "Offering", like so:</p>
 
 <p>If some keys <em>are</em> being offered, but not the key that was supposed to be
 used, you may be using ssh-agent (next bullet).  You may also need to
-setup/edit <code>~/.ssh/config</code> (appendix 4).</p></li>
+create some host aliases in <code>~/.ssh/config</code> (appendix 4).</p></li>
 <li><p>(ssh-agent issues) If <code>ssh-add -l</code> responds with either "The agent has no
 identities." or "Could not open a connection to your authentication
 agent.", then you can skip this bullet.</p>
@@ -495,9 +495,11 @@ those keys, <em>even if you explicitly ask</em> for some other key to be used.</
 the access again.</p></li>
 </ul>
 
-<p><a name="_appendix_4_making_git_use_the_right_options_for_ssh"></a></p>
+<p><a name="_appendix_4_host_aliases"></a></p>
 
-<h3>appendix 4: making git use the right options for ssh</h3>
+<h3>appendix 4: host aliases</h3>
+
+<p>(or "making git use the right options for ssh")</p>
 
 <p>The ssh command has several options for non-default items to be specified.
 Two common examples are <code>-p</code> for the port number if it is not 22, and <code>-i</code> for
@@ -514,9 +516,9 @@ within ssh and give it a short, easy-to-remember, name.  Example:</p>
 
 <pre><code>host gitolite
     user git
-    port 2244
     hostname a.long.server.name.or.annoying.IP.address
-    identityfile ~/.ssh/sita
+    port 22
+    identityfile ~/.ssh/id_rsa
 </code></pre>
 
 <p>Now you can simply use the one word <code>gitolite</code> (which is the host alias we
